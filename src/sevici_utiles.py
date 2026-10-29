@@ -1,4 +1,5 @@
 from collections import namedtuple
+from math import sqrt
 
 EstacionSevici = namedtuple("EstacionSevici", 
     "nombre, direccion, latitud, longitud, capacidad, puestos_libres, bicicletas_disponibles")
@@ -14,7 +15,18 @@ def selecciona_color(estacion:EstacionSevici) -> str:
     str: "green", "orange", "red" o "gray"
     """
     # TODO: Ejercicio 1
-    return "green"
+    if estacion.capacidad == 0:
+        return "gray"
+    disponibilidad = (estacion.bicicletas_disponibles/estacion.capacidad)
+    if disponibilidad >= 2/3:
+
+        return "green"
+    elif disponibilidad >= 1/3:
+        return "orange"
+    elif disponibilidad >0:
+        return "red"
+    else:
+        return "gray"
 
 def calcula_estadisticas(estaciones: list[EstacionSevici]) -> tuple[int, int, float, int]:
     """
@@ -25,7 +37,16 @@ def calcula_estadisticas(estaciones: list[EstacionSevici]) -> tuple[int, int, fl
     tupla con (total de bicicletas libres, total de capacidad, porcentaje de ocupación, total de estaciones)
     """
     # TODO: Ejercicio 2
-    return (0, 0, 0.0, 0)
+    bicis_total = 0
+    capacidad_total = 0
+    estacion = 0
+    for i in estaciones:
+        bicis_total+=i.bicicletas_disponibles
+        capacidad_total+=i.capacidad
+        estacion += 1
+
+    prc_ocupacion = 100-(bicis_total/capacidad_total)*100
+    return (bicis_total, capacidad_total, prc_ocupacion, estacion)
 
 def busca_estaciones_direccion(estaciones: list[EstacionSevici], direccion_parcial: str) -> list[EstacionSevici]:
     """
@@ -38,8 +59,13 @@ def busca_estaciones_direccion(estaciones: list[EstacionSevici], direccion_parci
     Devuelve:
     lista de EstacionSevici que cumplen el criterio
     """
-    # TODO: Ejercicio 3
-    return []
+    # TODO: Ejercicio 30
+    lista_res=[]
+    for i in estaciones:
+        if direccion_parcial.lower() in i.direccion.lower():
+            lista_res.append(i)
+
+    return lista_res
 
 def busca_estaciones_con_disponibilidad(estaciones:list[EstacionSevici], min_disponibilidad: float = 0.5) -> list[EstacionSevici]:
     """
@@ -54,7 +80,15 @@ def busca_estaciones_con_disponibilidad(estaciones:list[EstacionSevici], min_dis
     lista de EstacionSevici
     """
     # TODO: Ejercicio 4
-    return estaciones
+    lista=[]
+    for i in estaciones:
+        if i.capacidad != 0:
+            disponibilidad = (i.bicicletas_disponibles/i.capacidad)
+
+            if disponibilidad >= min_disponibilidad:
+            
+                lista.append(i)
+    return lista
 
 def calcula_distancia(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     """
@@ -68,7 +102,8 @@ def calcula_distancia(p1: tuple[float, float], p2: tuple[float, float]) -> float
     float: distancia euclídea entre los dos puntos
     """
     # TODO: Ejercicio 5
-    pass
+    distancia = sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)
+    return distancia
 
 def busca_estacion_mas_cercana(estaciones:list[EstacionSevici], punto:tuple[float, float]) -> EstacionSevici | None:
     """
@@ -82,7 +117,16 @@ def busca_estacion_mas_cercana(estaciones:list[EstacionSevici], punto:tuple[floa
     EstacionSevici más cercana con al menos una bicicleta disponible, o None si no hay ninguna.
     """ 
     # TODO: Ejercicio 5
-    return None
+    res = None
+
+    for i in estaciones:
+        if res == None:
+            res = i
+        else:
+            if calcula_distancia((i.latitud, i.longitud),punto) < calcula_distancia((res.latitud,res.longitud),punto) :
+                res = i
+            
+    return res
 
 def calcula_ruta(estaciones:list[EstacionSevici], origen:tuple[float, float], destino:tuple[float, float]) -> tuple[EstacionSevici | None, EstacionSevici | None]   :
     """
@@ -97,5 +141,7 @@ def calcula_ruta(estaciones:list[EstacionSevici], origen:tuple[float, float], de
     tupla con (estacion_origen, estacion_destino)
     """
     # TODO: Ejercicio 5
-    pass
+    res_origen = busca_estacion_mas_cercana(estaciones, origen)
+    res_destino = busca_estacion_mas_cercana(estaciones, destino)
+    return res_origen,res_destino
 
